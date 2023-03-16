@@ -1,6 +1,7 @@
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
+#include <time.h>
 using namespace std;
 
 //枚举类型方位
@@ -227,20 +228,70 @@ void InitGraph(boundary boundary[4][27], wall wall[])
 		wall[i].setXY(i, 15);
 		wall[i].printWall();
 	}
+	//获取句柄
+	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD ps;
+	ps.X = 70;
+	ps.Y = 1;
+	SetConsoleTextAttribute(ConsoleHandle, 15);//字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, ps);//移动光标
+	cout << "Greedy Snake" << endl;
+	cout << "\t\t\t\t\t\t\t\t\t贪吃蛇" << endl;
+	cout << "\t\t\t\t\t\t\t\t关卡：" << endl;
+	cout << "\t\t\t\t\t\t\t\t\t\t第一关" << endl;
+	cout << "\t\t\t\t\t\t\t\t用时：" << endl;
 }
 
+//打印时间
+void printTime(int time) {
+	//获取句柄
+	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD pt;
+	pt.X = 80;
+	pt.Y = 6;
+	SetConsoleTextAttribute(ConsoleHandle, 15);//字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, pt);//移动光标
+	cout << time <<"s";
+}
 //结束菜单
-void judgeSuccess(int judge) {
+void judgeSuccess(int judge,int time) {
+	//获取句柄
+	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD ps;
+	ps.X = 24;
+	ps.Y = 10;
+	SetConsoleTextAttribute(ConsoleHandle, 15);//字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, ps);//移动光标
 	if (judge == 1)//吃到食物
 	{
-		cout << "闯关成功！" << endl;
+		cout << " ----------------------------------------" << endl;
+		cout << "\t\t\t|              you win!!!                |" << endl;
+		cout << "\t\t\t|             恭喜你成功了！             |" << endl;
+		cout << "\t\t\t|你所用时为：                            |" << endl;
+		cout << "\t\t\t|              " << time << "s\t\t         |" << endl;
+		cout << "\t\t\t|                                        |" << endl;
+		cout << " \t\t\t ----------------------------------------" << endl;
 	}
 	else if (judge == 2) {
-		cout << "闯关失败！" << endl;
+		cout << " ----------------------------------------" << endl;
+		cout << "\t\t\t|              Game Over!!!             |" << endl;
+		cout << "\t\t\t|             很遗憾你失败了！          |" << endl;
+		cout << "\t\t\t|你所用时为：                           |" << endl;
+		cout << "\t\t\t|              " << time << "s\t\t        |" << endl;
+		cout << "\t\t\t|                                       |" << endl;
+		cout << "\t\t\t ----------------------------------------" << endl;
+	}
+	if (judge != 0) {
+		ps.X = 28;
+		ps.Y = 15;
+		SetConsoleCursorPosition(ConsoleHandle, ps);//移动光标
+		system("pause");
+		exit(0);
 	}
 }
 int main()
 {
+	clock_t start, end;
 	//定义边界对象
 	boundary boundary[4][27];
 	wall wall[100];
@@ -253,18 +304,28 @@ int main()
 	//隐藏光标
     CONSOLE_CURSOR_INFO cursor_info = { 1, 0 };
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor_info);
-
+	
 	//画边界
 	InitGraph(boundary, wall);
 	//设置食物
 	setfood(food,snake,foodPosition);
 	int judge = 0;
+	int time = 0;
+	start = clock();//计时开始
 	while (1) {
+		//打印蛇
 		snake.printSnake();
+		//获取键盘输入
 		input(snake, ch);
+		//蛇移动  判断结束
 	    judge = move(snake, foodPosition, wall);
-		judgeSuccess(judge);
-		Sleep(100);
+		//计时
+		end = clock();
+		time = (double)(end - start) / CLOCKS_PER_SEC;
+		printTime(time);
+		//结束菜单
+		judgeSuccess(judge,time);
+		Sleep(150);//速度控制
 	}
 	printf("\n\n\n");
 	return 0;
