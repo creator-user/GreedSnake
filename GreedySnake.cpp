@@ -8,7 +8,7 @@ enum Direction
 {
 	UP, DOWN, LEFT, RIGHT
 };
-
+/**************类的定义****************/
 //边界方块
 class boundary
 {
@@ -35,7 +35,31 @@ public:
 		cout << ch;
 	}
 };
+//墙块
+class wall {
+	char* ch;
+public:
+	COORD block;
+	wall() {
+		ch = (char*)"■";
+		block.X = 0;
+		block.Y = 0;
+	}
+	//设置坐标
+	void setXY(int x,int y) {
+		block.X = x;
+		block.Y = y;
+	}
+	//打印方块
+	void printWall() {
+		//获取句柄
+		HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
+		SetConsoleTextAttribute(ConsoleHandle, 10);//字体颜色
+		SetConsoleCursorPosition(ConsoleHandle, block);//移动光标
+		cout << ch;
+	}
+};
 //食物
 class Food {
 	char* ch;
@@ -111,13 +135,43 @@ public:
 	}
 };
 
-
-int move(Snake &snake, COORD foodPosition)
+/***************函数定义****************/
+//设置食物
+void setfood(Food food, Snake snake, COORD& foodPosition) {//设置食物
+	srand((int)time(0));
+	//找到符合条件的坐标位置
+	int m = 1;
+	do {
+		foodPosition.X = rand() % 55;
+		foodPosition.Y = rand() % 28;
+		if (foodPosition.X >= 3 && foodPosition.X <= 54 && foodPosition.Y >= 2 && foodPosition.Y <= 27 && foodPosition.Y % 2 == 0 && foodPosition.X % 2 == 1) {//在界限内
+			for (int i = 0; i < snake.len; i++) {
+				if (snake.body[i].X == foodPosition.X && snake.body[i].Y == foodPosition.Y) {//不为蛇身
+					m = 0;
+					break;
+				}
+			}
+			if (m == 1) {
+				break;
+			}
+		}
+	} while (1);
+	food.setPosition(foodPosition);
+	food.printCh();
+}
+//蛇的移动
+int move(Snake &snake, COORD foodPosition,wall wall[])
 {
 	
 	//判断食物
 	if (snake.head.X == foodPosition.X && snake.head.Y == foodPosition.Y) {
 		return 1;
+	}
+	else {//判断墙
+		for (int i = 0; i < 55;i++) {
+			if (snake.head.X == wall[i].block.X && snake.head.Y == wall[i].block.Y)
+				return 2;
+		}
 	}
 	//删除尾巴，整体后移
 	for (int i = snake.len - 1; i > 0; i--) {
@@ -143,7 +197,6 @@ int move(Snake &snake, COORD foodPosition)
 	snake.body[0] = snake.head;//插入新头
 	return 0;
 }
-
 //检测输入，改变蛇方向
 void input(Snake& snake, char& ch)
 {
@@ -154,8 +207,8 @@ void input(Snake& snake, char& ch)
 	//改变方向（不能是同一直线上改方向）
 	snake.change_dir(ch);
 }
-
-void InitGraph(boundary boundary[4][27])
+//初始化界面
+void InitGraph(boundary boundary[4][27], wall wall[])
 {
 	//画边界
 	for (int i = 0; i < 4; i++) {
@@ -169,6 +222,11 @@ void InitGraph(boundary boundary[4][27])
 			boundary[i][j].printBoundary();
 		}
 	}
+	//画墙
+	for (int i = 3; i < 56; i++) {
+		wall[i].setXY(i, 15);
+		wall[i].printWall();
+	}
 }
 
 //结束菜单
@@ -177,46 +235,34 @@ void judgeSuccess(int judge) {
 	{
 		cout << "闯关成功！" << endl;
 	}
+	else if (judge == 2) {
+		cout << "闯关失败！" << endl;
+	}
 }
 int main()
 {
 	//定义边界对象
 	boundary boundary[4][27];
+	wall wall[100];
 	Food food;
 	Snake snake;
 	char ch = 77;//获取键盘值，初始为右
+	COORD foodPosition;//食物坐标
+	foodPosition.X = 0; foodPosition.Y = 0;//初始化
+
 	//隐藏光标
     CONSOLE_CURSOR_INFO cursor_info = { 1, 0 };
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor_info);
+
 	//画边界
-	InitGraph(boundary);
+	InitGraph(boundary, wall);
 	//设置食物
-	COORD foodPosition;
-	srand((int)time(0));
-	//找到符合条件的坐标位置
-	int m = 1;
-	do {
-		foodPosition.X = rand() % 55;
-		foodPosition.Y = rand() % 28;
-		if (foodPosition.X >= 3 && foodPosition.X <= 54 && foodPosition.Y >= 2 && foodPosition.Y <= 27 && foodPosition.Y % 2 == 0 && foodPosition.X % 2 == 1) {//在界限内
-			for (int i = 0; i < snake.len; i++) {
-				if (snake.body[i].X == foodPosition.X && snake.body[i].Y == foodPosition.Y) {//不为蛇身
-					m = 0;
-					break;
-				}
-			}
-			if (m == 1) {
-				break;
-			}
-		}
-	} while (1);
-	food.setPosition(foodPosition);
-	food.printCh();
+	setfood(food,snake,foodPosition);
 	int judge = 0;
 	while (1) {
 		snake.printSnake();
 		input(snake, ch);
-	    judge = move(snake, foodPosition);
+	    judge = move(snake, foodPosition, wall);
 		judgeSuccess(judge);
 		Sleep(100);
 	}
