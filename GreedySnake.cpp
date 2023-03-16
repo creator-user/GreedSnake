@@ -35,6 +35,7 @@ public:
 		cout << ch;
 	}
 };
+
 //食物
 class Food {
 	char* ch;
@@ -113,6 +114,11 @@ public:
 
 int move(Snake &snake, COORD foodPosition)
 {
+	
+	//判断食物
+	if (snake.head.X == foodPosition.X && snake.head.Y == foodPosition.Y) {
+		return 1;
+	}
 	//删除尾巴，整体后移
 	for (int i = snake.len - 1; i > 0; i--) {
 		snake.body[i] = snake.body[i - 1];
@@ -133,7 +139,7 @@ int move(Snake &snake, COORD foodPosition)
 		snake.head.Y = 27;
 	else if (snake.head.Y > 27)
 		snake.head.Y = 2;
-	
+
 	snake.body[0] = snake.head;//插入新头
 	return 0;
 }
@@ -141,10 +147,10 @@ int move(Snake &snake, COORD foodPosition)
 //检测输入，改变蛇方向
 void input(Snake& snake, char& ch)
 {
-	//if (_kbhit()){//判断有键盘输入
+	if (_kbhit()){//判断有键盘输入
 		_getch();//清除无关字符
 		ch = _getch();//读取键盘输入值
-	//}
+	}
 	//改变方向（不能是同一直线上改方向）
 	snake.change_dir(ch);
 }
@@ -165,7 +171,13 @@ void InitGraph(boundary boundary[4][27])
 	}
 }
 
-
+//结束菜单
+void judgeSuccess(int judge) {
+	if (judge == 1)//吃到食物
+	{
+		cout << "闯关成功！" << endl;
+	}
+}
 int main()
 {
 	//定义边界对象
@@ -204,7 +216,8 @@ int main()
 	while (1) {
 		snake.printSnake();
 		input(snake, ch);
-	    judge = move(snake);
+	    judge = move(snake, foodPosition);
+		judgeSuccess(judge);
 		Sleep(100);
 	}
 	printf("\n\n\n");
