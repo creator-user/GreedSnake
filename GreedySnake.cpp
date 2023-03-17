@@ -99,12 +99,12 @@ public:
 	Snake() {
 		ch0 = (char*)"●";
 		len = 5;
-		head.X = 13;
+		head.X = 45;
 		head.Y = 5;
 		tail.X = head.X + len;
 		tail.Y = head.Y;
 		for (int i = 0; i < len; i++) {
-			body[i].X = head.X + (i + 1);
+			body[i].X = head.X - (2 * i);//头在右，身体在左
 			body[i].Y = head.Y;
 		}
 		direc = RIGHT;
@@ -128,26 +128,31 @@ public:
 		cout << " ";
 		tail = body[len - 1];//更新蛇尾位置
 		for (int i = 0; i < len; i++) {
-			//打印此次蛇头
+			//打印此次蛇
 			SetConsoleCursorPosition(ConsoleHandle, body[i]);//移动光标
 			cout << ch0;
 		}
-		
 	}
 };
 
 /***************函数定义****************/
 //设置食物
-void setfood(Food food, Snake snake, COORD& foodPosition) {//设置食物
+void setfood(Food food, Snake snake, COORD& foodPosition, wall wall[]) {//设置食物
 	srand((int)time(0));
 	//找到符合条件的坐标位置
 	int m = 1;
 	do {
 		foodPosition.X = rand() % 55;
 		foodPosition.Y = rand() % 28;
-		if (foodPosition.X >= 3 && foodPosition.X <= 54 && foodPosition.Y >= 2 && foodPosition.Y <= 27 && foodPosition.Y % 2 == 0 && foodPosition.X % 2 == 1) {//在界限内
+		if (foodPosition.X >= 3 && foodPosition.X <= 54 && foodPosition.Y >= 0 && foodPosition.Y <= 27 && foodPosition.Y % 2 == 0 && foodPosition.X % 2 == 1) {//在界限内
 			for (int i = 0; i < snake.len; i++) {
 				if (snake.body[i].X == foodPosition.X && snake.body[i].Y == foodPosition.Y) {//不为蛇身
+					m = 0;
+					break;
+				}
+			}
+			for (int i = 0; i < 50;i++) {
+				if (wall[i].block.X == foodPosition.X && wall[i].block.Y == foodPosition.Y) {//不为墙
 					m = 0;
 					break;
 				}
@@ -161,17 +166,20 @@ void setfood(Food food, Snake snake, COORD& foodPosition) {//设置食物
 	food.printCh();
 }
 //蛇的移动
-int move(Snake &snake, COORD foodPosition,wall wall[])
+int move(Snake &snake, COORD foodPosition, wall wall[])
 {
-	
 	//判断食物
 	if (snake.head.X == foodPosition.X && snake.head.Y == foodPosition.Y) {
 		return 1;
 	}
 	else {//判断墙
-		for (int i = 0; i < 55;i++) {
+		for (int i = 0; i < 100; i++) {
 			if (snake.head.X == wall[i].block.X && snake.head.Y == wall[i].block.Y)
 				return 2;
+		}
+		for (int i = 1; i < snake.len; i++) {
+			if (snake.head.X == snake.body[i].X && snake.head.Y == snake.body[i].Y)
+				return 3;
 		}
 	}
 	//删除尾巴，整体后移
@@ -209,7 +217,7 @@ void input(Snake& snake, char& ch)
 	snake.change_dir(ch);
 }
 //初始化界面
-void InitGraph(boundary boundary[4][27], wall wall[])
+void InitGraph(boundary boundary[4][27],int flag)
 {
 	//画边界
 	for (int i = 0; i < 4; i++) {
@@ -223,11 +231,6 @@ void InitGraph(boundary boundary[4][27], wall wall[])
 			boundary[i][j].printBoundary();
 		}
 	}
-	//画墙
-	for (int i = 3; i < 56; i++) {
-		wall[i].setXY(i, 15);
-		wall[i].printWall();
-	}
 	//获取句柄
 	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	COORD ps;
@@ -238,21 +241,96 @@ void InitGraph(boundary boundary[4][27], wall wall[])
 	cout << "Greedy Snake" << endl;
 	cout << "\t\t\t\t\t\t\t\t\t贪吃蛇" << endl;
 	cout << "\t\t\t\t\t\t\t\t关卡：" << endl;
-	cout << "\t\t\t\t\t\t\t\t\t\t第一关" << endl;
+	cout << "\t\t\t\t\t\t\t\t\t\t第"<<flag<<"关"<< endl;
 	cout << "\t\t\t\t\t\t\t\t用时：" << endl;
 }
 
-//打印时间
-void printTime(int time) {
-	//获取句柄
-	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	COORD pt;
-	pt.X = 80;
-	pt.Y = 6;
-	SetConsoleTextAttribute(ConsoleHandle, 15);//字体颜色
-	SetConsoleCursorPosition(ConsoleHandle, pt);//移动光标
-	cout << time <<"s";
+//打印墙
+void setWall(wall wall[50],int flag) {
+	int index = 0;
+	//画墙
+	if (flag == 1) {//第一关
+		for (int i = 3; i < 56; i += 2) {
+			wall[index].setXY(i, 15);
+			wall[index].printWall();
+			index++;
+		}
+	}
+	else if (flag == 2) {//第二关
+		for (int i = 2; i <= 14; i++) {//左上
+			wall[index].setXY(19, i);
+			wall[index].printWall();
+			index++;
+		}
+		for (int i = 29; i <= 55; i += 2) {//右上
+			wall[index].setXY(i, 10);
+			wall[index].printWall();
+			index++;
+		}
+		for (int i = 3; i <= 29; i += 2) {//左上
+			wall[index].setXY(i, 18);
+			wall[index].printWall();
+			index++;
+		}
+		for (int i = 14; i <= 27; i++) {//右下
+			wall[index].setXY(37, i);
+			wall[index].printWall();
+			index++;
+		}
+	}
+	else if (flag == 3) {//第三关
+		for (int i = 2; i <= 27; i++) {//竖线
+			wall[index].setXY(29, i);
+			wall[index].printWall();
+			index++;
+		}
+		for (int i = 3; i <= 55; i+=2) {//横线
+			wall[index].setXY(i, 14);
+			wall[index].printWall();
+			index++;
+		}
+	}
+	else if (flag == 4) {//第四关
+		for (int i = 3; i <= 9; i+=2) {
+			wall[index].setXY(i, 2);
+			wall[index].printWall();
+			index++;
+		}
+		for (int i = 17; i <= 49; i+=2) {
+			wall[index].setXY(i, 2);
+			wall[index].printWall();
+			index++;
+		}
+		for (int i = 3; i <= 4; i++) {
+			wall[index].setXY(3, i);
+			wall[index].printWall();
+			index++;
+		}
+		for (int i = 3; i < 10; i++) {
+			wall[index].setXY(27, i);
+			wall[index].printWall();
+			index++;
+		}
+		for (int i = 3; i <= 55; i+=2) {
+			if (i != 29 && i != 33 && i != 31) {
+				wall[index].setXY(i, 10);
+				wall[index].printWall();
+				index++;
+			}
+		}
+		for (int i = 3; i <= 55; i+=2) {
+			wall[index].setXY(i, 20);
+			wall[index].printWall();
+			index++;
+		}
+		for (int i = 20; i <= 27; i++) {
+			wall[index].setXY(27, i);
+			wall[index].printWall();
+			index++;
+		}
+	}
 }
+
 //结束菜单
 void judgeSuccess(int judge,int time) {
 	//获取句柄
@@ -275,7 +353,16 @@ void judgeSuccess(int judge,int time) {
 	else if (judge == 2) {
 		cout << " ----------------------------------------" << endl;
 		cout << "\t\t\t|              Game Over!!!             |" << endl;
-		cout << "\t\t\t|             很遗憾你失败了！          |" << endl;
+		cout << "\t\t\t|         很遗憾你撞上墙失败了！        |" << endl;
+		cout << "\t\t\t|你所用时为：                           |" << endl;
+		cout << "\t\t\t|              " << time << "s\t\t        |" << endl;
+		cout << "\t\t\t|                                       |" << endl;
+		cout << "\t\t\t ----------------------------------------" << endl;
+	}
+	else if (judge == 3) {
+		cout << " ----------------------------------------" << endl;
+		cout << "\t\t\t|              Game Over!!!             |" << endl;
+		cout << "\t\t\t|         很遗憾你撞上自己失败了！      |" << endl;
 		cout << "\t\t\t|你所用时为：                           |" << endl;
 		cout << "\t\t\t|              " << time << "s\t\t        |" << endl;
 		cout << "\t\t\t|                                       |" << endl;
@@ -289,8 +376,22 @@ void judgeSuccess(int judge,int time) {
 		exit(0);
 	}
 }
-int main()
-{
+
+//打印时间
+void printTime(int time) {
+	//获取句柄
+	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD pt;
+	pt.X = 80;
+	pt.Y = 6;
+	SetConsoleTextAttribute(ConsoleHandle, 15);//字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, pt);//移动光标
+	cout << time << "s";
+}
+
+//游戏主程序
+//关卡数
+void game(int flag) {
 	clock_t start, end;
 	//定义边界对象
 	boundary boundary[4][27];
@@ -301,32 +402,38 @@ int main()
 	COORD foodPosition;//食物坐标
 	foodPosition.X = 0; foodPosition.Y = 0;//初始化
 
-	//隐藏光标
-    CONSOLE_CURSOR_INFO cursor_info = { 1, 0 };
-	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor_info);
-	
 	//画边界
-	InitGraph(boundary, wall);
+	InitGraph(boundary,flag);
+	//画墙
+	setWall(wall, flag);
 	//设置食物
-	setfood(food,snake,foodPosition);
+	setfood(food, snake, foodPosition, wall);
 	int judge = 0;
 	int time = 0;
 	start = clock();//计时开始
 	while (1) {
 		//打印蛇
 		snake.printSnake();
+		Sleep(100);//速度控制
 		//获取键盘输入
 		input(snake, ch);
 		//蛇移动  判断结束
-	    judge = move(snake, foodPosition, wall);
+		judge = move(snake, foodPosition, wall);
 		//计时
 		end = clock();
 		time = (double)(end - start) / CLOCKS_PER_SEC;
 		printTime(time);
 		//结束菜单
-		judgeSuccess(judge,time);
-		Sleep(150);//速度控制
+		judgeSuccess(judge, time);
 	}
-	printf("\n\n\n");
+}
+int main()
+{
+	//隐藏光标
+	CONSOLE_CURSOR_INFO cursor_info = { 1, 0 };
+	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor_info);
+
+	game(4);
+	
 	return 0;
 }
