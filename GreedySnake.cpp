@@ -144,7 +144,7 @@ void setfood(Food food, Snake snake, COORD& foodPosition, wall wall[]) {//设置食
 	do {
 		foodPosition.X = rand() % 55;
 		foodPosition.Y = rand() % 28;
-		if (foodPosition.X >= 3 && foodPosition.X <= 54 && foodPosition.Y >= 0 && foodPosition.Y <= 27 && foodPosition.Y % 2 == 0 && foodPosition.X % 2 == 1) {//在界限内
+		if (foodPosition.X >= 3 && foodPosition.X <= 54 && foodPosition.Y >= 2 && foodPosition.Y <= 27 && foodPosition.Y % 2 == 0 && foodPosition.X % 2 == 1) {//在界限内
 			for (int i = 0; i < snake.len; i++) {
 				if (snake.body[i].X == foodPosition.X && snake.body[i].Y == foodPosition.Y) {//不为蛇身
 					m = 0;
@@ -219,6 +219,10 @@ void input(Snake& snake, char& ch)
 //初始化界面
 void InitGraph(boundary boundary[4][27],int flag)
 {
+	//获取句柄
+	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(ConsoleHandle, 0);//字体颜色
+	system("cls");
 	//画边界
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 27; j++) {
@@ -231,8 +235,6 @@ void InitGraph(boundary boundary[4][27],int flag)
 			boundary[i][j].printBoundary();
 		}
 	}
-	//获取句柄
-	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	COORD ps;
 	ps.X = 70;
 	ps.Y = 1;
@@ -243,8 +245,12 @@ void InitGraph(boundary boundary[4][27],int flag)
 	cout << "\t\t\t\t\t\t\t\t关卡：" << endl;
 	cout << "\t\t\t\t\t\t\t\t\t\t第"<<flag<<"关"<< endl;
 	cout << "\t\t\t\t\t\t\t\t用时：" << endl;
+	ps.X = 65;
+	ps.Y = 10;
+	SetConsoleTextAttribute(ConsoleHandle, 12);//字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, ps);//移动光标
+	cout << "请按方向键移动" << endl;
 }
-
 //打印墙
 void setWall(wall wall[50],int flag) {
 	int index = 0;
@@ -331,8 +337,8 @@ void setWall(wall wall[50],int flag) {
 	}
 }
 
-//结束菜单
-void judgeSuccess(int judge,int time) {
+//失败菜单
+void judgeFail(int judge,int time) {
 	//获取句柄
 	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	COORD ps;
@@ -340,22 +346,12 @@ void judgeSuccess(int judge,int time) {
 	ps.Y = 10;
 	SetConsoleTextAttribute(ConsoleHandle, 15);//字体颜色
 	SetConsoleCursorPosition(ConsoleHandle, ps);//移动光标
-	if (judge == 1)//吃到食物
-	{
-		cout << " ----------------------------------------" << endl;
-		cout << "\t\t\t|              you win!!!                |" << endl;
-		cout << "\t\t\t|             恭喜你成功了！             |" << endl;
-		cout << "\t\t\t|你所用时为：                            |" << endl;
-		cout << "\t\t\t|              " << time << "s\t\t         |" << endl;
-		cout << "\t\t\t|                                        |" << endl;
-		cout << " \t\t\t ----------------------------------------" << endl;
-	}
-	else if (judge == 2) {
+	if (judge == 2) {
 		cout << " ----------------------------------------" << endl;
 		cout << "\t\t\t|              Game Over!!!             |" << endl;
 		cout << "\t\t\t|         很遗憾你撞上墙失败了！        |" << endl;
-		cout << "\t\t\t|你所用时为：                           |" << endl;
-		cout << "\t\t\t|              " << time << "s\t\t        |" << endl;
+		cout << "\t\t\t|                〒▽〒                  |" << endl;
+		cout << "\t\t\t|   才刚刚过去了 " << time << "s\t\t         |" << endl;
 		cout << "\t\t\t|                                       |" << endl;
 		cout << "\t\t\t ----------------------------------------" << endl;
 	}
@@ -363,8 +359,8 @@ void judgeSuccess(int judge,int time) {
 		cout << " ----------------------------------------" << endl;
 		cout << "\t\t\t|              Game Over!!!             |" << endl;
 		cout << "\t\t\t|         很遗憾你撞上自己失败了！      |" << endl;
-		cout << "\t\t\t|你所用时为：                           |" << endl;
-		cout << "\t\t\t|              " << time << "s\t\t        |" << endl;
+		cout << "\t\t\t|                〒▽〒                  |" << endl;
+		cout << "\t\t\t|   才刚刚过去了 " << time << "s\t\t        |" << endl;
 		cout << "\t\t\t|                                       |" << endl;
 		cout << "\t\t\t ----------------------------------------" << endl;
 	}
@@ -372,6 +368,84 @@ void judgeSuccess(int judge,int time) {
 		ps.X = 28;
 		ps.Y = 15;
 		SetConsoleCursorPosition(ConsoleHandle, ps);//移动光标
+		system("pause");
+		exit(0);
+	}
+}
+
+//胜利菜单
+int judgeSuccess(int time, int a)
+{
+	//获取句柄
+	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	int key = 1;//当前选中项
+	COORD b1 = { 24,10 };
+	SetConsoleTextAttribute(ConsoleHandle, 13);//字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, b1);//移动光标
+	if (a != 4) {
+		cout << " ----------------------------------------" << endl;
+		cout << "\t\t\t|              you win!!!                |" << endl;
+		cout << "\t\t\t|           恭喜你通过本关！             |" << endl;
+		cout << "\t\t\t|你所用时为：                            |" << endl;
+		cout << "\t\t\t|              " << time << "s\t\t         |" << endl;
+		cout << "\t\t\t|                                        |" << endl;
+		cout << "\t\t\t|请选择你的下一步操作：                  |" << endl;
+		cout << "\t\t\t|                                        |" << endl;
+		cout << " \t\t\t ----------------------------------------" << endl;
+		b1 = { 47,17 };
+		SetConsoleTextAttribute(ConsoleHandle, 253);//字体颜色
+		SetConsoleCursorPosition(ConsoleHandle, b1);//移动光标
+		cout << "退出";
+		b1 = { 53,17 };
+		SetConsoleTextAttribute(ConsoleHandle, 13);//字体颜色
+		SetConsoleCursorPosition(ConsoleHandle, b1);//移动光标
+		cout << "下一关";
+		while (1) {
+			char ch = _getch();
+			//ch = _getch();
+			switch (ch) {
+			case 75://left
+				switch (key) {
+				case 2:b1 = { 47,17 };
+					  SetConsoleTextAttribute(ConsoleHandle, 253);//字体颜色
+					  SetConsoleCursorPosition(ConsoleHandle, b1);//移动光标
+					  cout << "退出";
+					  b1 = { 53,17 };
+					  SetConsoleTextAttribute(ConsoleHandle, 13);//字体颜色
+					  SetConsoleCursorPosition(ConsoleHandle, b1);//移动光标
+					  cout << "下一关";
+					  key--; break;
+				}break;
+			case 77://right
+				switch (key) {
+				case 1:b1 = { 47,17 };
+					  SetConsoleTextAttribute(ConsoleHandle, 13);//字体颜色
+					  SetConsoleCursorPosition(ConsoleHandle, b1);//移动光标
+					  cout << "退出";
+					  b1 = { 53,17 };
+					  SetConsoleTextAttribute(ConsoleHandle, 253);//字体颜色
+					  SetConsoleCursorPosition(ConsoleHandle, b1);//移动光标
+					  cout << "下一关";
+					  key++; break;
+				}break;
+			case 13://enter
+				return key;
+			default:break;
+			}
+		}
+	}
+	else
+	{
+		cout << " ----------------------------------------" << endl;
+		cout << "\t\t\t|              you win!!!                |" << endl;
+		cout << "\t\t\t|           恭喜你全部通关！             |" << endl;
+		cout << "\t\t\t|你本关用时为：                          |" << endl;
+		cout << "\t\t\t|              " << time << "s\t\t         |" << endl;
+		cout << "\t\t\t|                                        |" << endl;
+		cout << " \t\t\t ----------------------------------------" << endl;
+		b1.X = 28;
+		b1.Y = 15;
+		SetConsoleCursorPosition(ConsoleHandle, b1);//移动光标
 		system("pause");
 		exit(0);
 	}
@@ -390,8 +464,7 @@ void printTime(int time) {
 }
 
 //游戏主程序
-//关卡数
-void game(int flag) {
+void game(int &time, int flag) {
 	clock_t start, end;
 	//定义边界对象
 	boundary boundary[4][27];
@@ -409,7 +482,6 @@ void game(int flag) {
 	//设置食物
 	setfood(food, snake, foodPosition, wall);
 	int judge = 0;
-	int time = 0;
 	start = clock();//计时开始
 	while (1) {
 		//打印蛇
@@ -419,12 +491,14 @@ void game(int flag) {
 		input(snake, ch);
 		//蛇移动  判断结束
 		judge = move(snake, foodPosition, wall);
+		if (judge == 1)//吃到食物
+			return;
 		//计时
 		end = clock();
 		time = (double)(end - start) / CLOCKS_PER_SEC;
 		printTime(time);
 		//结束菜单
-		judgeSuccess(judge, time);
+		judgeFail(judge, time);
 	}
 }
 int main()
@@ -432,8 +506,18 @@ int main()
 	//隐藏光标
 	CONSOLE_CURSOR_INFO cursor_info = { 1, 0 };
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor_info);
-
-	game(4);
-	
+	int time = 0;//总时间
+	int flag;
+	int a = 1;//关卡
+	while (1) {
+		flag = 0;
+		game(time,a);
+		flag = judgeSuccess(time,a);
+		if (flag == 1)
+			break;
+		else if (flag == 2) {
+			a++;
+		}
+	}
 	return 0;
 }
