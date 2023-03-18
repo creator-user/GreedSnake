@@ -1,7 +1,7 @@
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
-#include <time.h>
+#include <ctime>
 using namespace std;
 
 //枚举类型方位
@@ -72,9 +72,9 @@ public:
 		position.Y = 10;
 	}
 	//设置坐标
-	void setPosition(COORD p)
+	void setPosition(short x,short y)
 	{
-		position = p;
+		position = {x,y};
 	}
 	void printCh() {
 		//获取句柄
@@ -134,24 +134,178 @@ public:
 		}
 	}
 };
+//蛇标题动画小块
+class SnakeTitle
+{
+	enum derec
+	{
+		LEFT,
+		RIGHT
+	};
+	char* ch;
+	derec derection; // 正在前进的方向
 
+public:
+	COORD p;
+	SnakeTitle()
+	{
+		derection = RIGHT;
+		ch = (char*)"●";
+		p = { 0, 0 };
+	}
+	//赋值坐标
+	void setXY(short x, short y)
+	{
+		p = { x, y };
+	}
+	//打印该字符
+	void printCh()
+	{
+		// 获取句柄
+		HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+		SetConsoleTextAttribute(ConsoleHandle, 9);  // 字体颜色
+		SetConsoleCursorPosition(ConsoleHandle, p); // 移动光标
+		cout << ch;
+	}
+	//清除该字符
+	void Clear()
+	{
+		// 获取句柄
+		HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+		SetConsoleTextAttribute(ConsoleHandle, 9);  // 字体颜色
+		SetConsoleCursorPosition(ConsoleHandle, p); // 移动光标
+		cout << " ";
+		if (p.X == 50)
+			derection = RIGHT;
+		else if (p.X == 58)
+			derection = LEFT;
+		if (derection == RIGHT)
+			p.X += 2;
+		else if (derection == LEFT)
+			p.X -= 2;
+	}
+};
 /***************函数定义****************/
+//指定位置打印指定字符串
+void print_title_block(short x, short y, char* ch)
+{
+	// 获取句柄
+	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD p = { x, y };
+	SetConsoleTextAttribute(ConsoleHandle, 9);  // 字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, p); // 移动光标
+	cout << ch;
+}
+//开篇动画
+void cartoon() {
+	//蛇
+	SnakeTitle MoveSnake[15];
+	//赋值初始坐标
+	MoveSnake[0].setXY(50, 15);
+	MoveSnake[1].setXY(52, 16);
+	MoveSnake[2].setXY(54, 17);
+	MoveSnake[3].setXY(56, 18);
+	MoveSnake[4].setXY(58, 19);
+
+	MoveSnake[5].setXY(50, 23);
+	MoveSnake[6].setXY(52, 22);
+	MoveSnake[7].setXY(54, 21);
+	MoveSnake[8].setXY(56, 20);
+
+	MoveSnake[9].setXY(52, 24);
+	MoveSnake[10].setXY(54, 25);
+	MoveSnake[11].setXY(56, 26);
+	MoveSnake[12].setXY(58, 27);
+	for (int i = 0; i < 16; i++)
+	{//打印
+		for (int j = 0; j < 13; j++)
+		{
+			MoveSnake[j].printCh();
+		}
+		Sleep(80);
+		//清除
+		for (int j = 0; j < 13; j++)
+		{
+			MoveSnake[j].Clear();
+			MoveSnake[j].setXY(MoveSnake[j].p.X, (MoveSnake[j].p.Y) -= 1);
+		}
+	}
+	// title title_block[100];
+	for (int i = 25; i > 0; i--)
+	{
+
+		// 绘制贪吃蛇标题
+		for (int x = 30; x <= 90; x += 2)
+			if ((x >= 30 && x <= 36) || x == 42 || x == 50 || x == 60 || x == 62 || x == 72 || x == 78 || (x >= 84 && x <= 90))
+				print_title_block(x, i, (char*)"■");
+
+		for (int x = 30; x <= 90; x += 2)
+			if (x == 30 || x == 42 || x == 44 || x == 50 || x == 72 || x == 76 || x == 84)
+				print_title_block(x, i + 1, (char*)"■");
+
+		for (int x = 30; x <= 90; x += 2)
+			if ((x >= 30 && x <= 36) || (x >= 58 && x <= 64) || x == 42 || x == 46 || x == 50 || x == 72 || x == 74 || (x >= 84 && x <= 90))
+				print_title_block(x, i + 2, (char*)"■");
+
+		for (int x = 30; x <= 90; x += 2)
+			if (x == 36 || x == 42 || x == 48 || x == 50 || x == 72 || x == 76 || x == 72 || x == 84)
+				print_title_block(x, i + 3, (char*)"■");
+
+		for (int x = 30; x <= 90; x += 2)
+			if ((x >= 30 && x <= 36) || x == 42 || x == 50 || x == 56 || x == 66 || x == 72 || x == 78 || (x >= 84 && x <= 90))
+				print_title_block(x, i + 4, (char*)"■");
+
+		Sleep(60); // 显示
+
+		// 删除此次标题，为下一次移动准备
+		if (i != 1)
+		{
+
+			for (int x = 30; x <= 90; x += 2)
+				if ((x >= 30 && x <= 36) || x == 42 || x == 50 || x == 60 || x == 62 || x == 72 || x == 78 || (x >= 84 && x <= 90))
+					print_title_block(x, i, (char*)" ");
+
+			for (int x = 30; x <= 90; x += 2)
+				if (x == 30 || x == 42 || x == 44 || x == 50 || x == 72 || x == 76 || x == 84)
+					print_title_block(x, i + 1, (char*)" ");
+
+			for (int x = 30; x <= 90; x += 2)
+				if ((x >= 30 && x <= 36) || (x >= 58 && x <= 64) || x == 42 || x == 46 || x == 50 || x == 72 || x == 74 || (x >= 84 && x <= 90))
+					print_title_block(x, i + 2, (char*)" ");
+
+			for (int x = 30; x <= 90; x += 2)
+				if (x == 36 || x == 42 || x == 48 || x == 50 || x == 72 || x == 76 || x == 72 || x == 84)
+					print_title_block(x, i + 3, (char*)" ");
+
+			for (int x = 30; x <= 90; x += 2)
+				if ((x >= 30 && x <= 36) || x == 42 || x == 50 || x == 56 || x == 66 || x == 72 || x == 78 || (x >= 84 && x <= 90))
+					print_title_block(x, i + 4, (char*)" ");
+		}
+	}
+	cout << "\n\n\t\t\tPress any key to start...\n\t\t\t";
+	system("pause");
+}
 //设置食物
-void setfood(Food food, Snake snake, COORD& foodPosition, wall wall[]) {//设置食物
-	srand((int)time(0));
+void setfood(Food food, Snake snake, COORD& foodPosition, wall wall[100]) {//设置食物
+	srand(time(0));
 	//找到符合条件的坐标位置
 	int m = 1;
-	do {
+	while (1){
 		foodPosition.X = rand() % 55;
 		foodPosition.Y = rand() % 28;
-		if (foodPosition.X >= 3 && foodPosition.X <= 54 && foodPosition.Y >= 2 && foodPosition.Y <= 27 && foodPosition.Y % 2 == 0 && foodPosition.X % 2 == 1) {//在界限内
+		if (foodPosition.X >= 3 && foodPosition.X <= 54 && foodPosition.Y >= 2 && foodPosition.Y <= 27 && foodPosition.X % 2 == 1) {//在界限内
 			for (int i = 0; i < snake.len; i++) {
 				if (snake.body[i].X == foodPosition.X && snake.body[i].Y == foodPosition.Y) {//不为蛇身
 					m = 0;
 					break;
 				}
 			}
-			for (int i = 0; i < 50;i++) {
+			if (m == 0) {
+				continue;
+			}
+			for (int i = 0; i < 100; i++) {
 				if (wall[i].block.X == foodPosition.X && wall[i].block.Y == foodPosition.Y) {//不为墙
 					m = 0;
 					break;
@@ -160,9 +314,13 @@ void setfood(Food food, Snake snake, COORD& foodPosition, wall wall[]) {//设置食
 			if (m == 1) {
 				break;
 			}
+			else
+				continue;
 		}
-	} while (1);
-	food.setPosition(foodPosition);
+		else
+			continue;
+	}
+	food.setPosition(foodPosition.X, foodPosition.Y);
 	food.printCh();
 }
 //蛇的移动
@@ -338,7 +496,7 @@ void setWall(wall wall[50],int flag) {
 }
 
 //失败菜单
-void judgeFail(int judge,int time) {
+int judgeFail(int judge,int time) {
 	//获取句柄
 	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	COORD ps;
@@ -369,7 +527,7 @@ void judgeFail(int judge,int time) {
 		ps.Y = 15;
 		SetConsoleCursorPosition(ConsoleHandle, ps);//移动光标
 		system("pause");
-		exit(0);
+		return 0;
 	}
 }
 
@@ -447,7 +605,303 @@ int judgeSuccess(int time, int a)
 		b1.Y = 15;
 		SetConsoleCursorPosition(ConsoleHandle, b1);//移动光标
 		system("pause");
-		exit(0);
+		return 0;
+	}
+}
+
+//主菜单一
+int main_menu1() {
+	// 绘制贪吃蛇标题
+	for (int x = 30; x <= 90; x += 2)
+		if ((x >= 30 && x <= 36) || x == 42 || x == 50 || x == 60 || x == 62 || x == 72 || x == 78 || (x >= 84 && x <= 90))
+			print_title_block(x, 1, (char*)"■");
+
+	for (int x = 30; x <= 90; x += 2)
+		if (x == 30 || x == 42 || x == 44 || x == 50 || x == 72 || x == 76 || x == 84)
+			print_title_block(x, 2, (char*)"■");
+
+	for (int x = 30; x <= 90; x += 2)
+		if ((x >= 30 && x <= 36) || (x >= 58 && x <= 64) || x == 42 || x == 46 || x == 50 || x == 72 || x == 74 || (x >= 84 && x <= 90))
+			print_title_block(x, 3, (char*)"■");
+
+	for (int x = 30; x <= 90; x += 2)
+		if (x == 36 || x == 42 || x == 48 || x == 50 || x == 72 || x == 76 || x == 72 || x == 84)
+			print_title_block(x, 4, (char*)"■");
+
+	for (int x = 30; x <= 90; x += 2)
+		if ((x >= 30 && x <= 36) || x == 42 || x == 50 || x == 56 || x == 66 || x == 72 || x == 78 || (x >= 84 && x <= 90))
+			print_title_block(x, 5, (char*)"■");
+	// 获取句柄
+	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD ps;
+	int key = 1; // 当前选关
+	ps.X = 82;
+	ps.Y = 8;
+	SetConsoleTextAttribute(ConsoleHandle, 249); // 字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+	cout << "闯关模式" << endl;
+	ps.X = 82;
+	ps.Y = 10;
+	SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+	cout << "选关模式" << endl;
+	ps.X = 82;
+	ps.Y = 12;
+	SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+	cout << "退出游戏" << endl;
+	char ch;
+	while (1)
+	{
+		ch = _getch();
+		switch (ch)
+		{
+		case 72://up键
+			if (key != 1)//不为最上方
+			{
+				switch (key)
+				{
+				case 2:
+					ps.X = 82;
+					ps.Y = 8;
+					SetConsoleTextAttribute(ConsoleHandle, 249); // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "闯关模式" << endl;
+					ps.X = 82;
+					ps.Y = 10;
+					SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "选关模式" << endl;
+					key--;
+					break;
+				case 3:
+					ps.X = 82;
+					ps.Y = 10;
+					SetConsoleTextAttribute(ConsoleHandle, 249); // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "选关模式" << endl;
+					ps.X = 82;
+					ps.Y = 12;
+					SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "退出游戏" << endl;
+					key--;
+					break;
+				}
+			}
+			break;
+		case 80://down键
+			if (key != 3)//不为最下方
+			{
+				switch (key)
+				{
+				case 1:
+					ps.X = 82;
+					ps.Y = 8;
+					SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "闯关模式" << endl;
+					ps.X = 82;
+					ps.Y = 10;
+					SetConsoleTextAttribute(ConsoleHandle, 249); // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "选关模式" << endl;
+					key++;
+					break;
+				case 2:
+					ps.X = 82;
+					ps.Y = 10;
+					SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "选关模式" << endl;
+					ps.X = 82;
+					ps.Y = 12;
+					SetConsoleTextAttribute(ConsoleHandle, 249); // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "退出游戏" << endl;
+					key++;
+					break;
+				}
+			}
+			break;
+		case 13:
+			return key;
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+//主菜单二
+int main_menu2()
+{
+	// 获取句柄
+	HANDLE ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD ps;
+	int key = 1; // 当前选关
+	ps.X = 55;
+	ps.Y = 3;
+	SetConsoleTextAttribute(ConsoleHandle, 10); // 字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+	cout << "选关模式" << endl;
+	ps.X = 60;
+	ps.Y = 5;
+	SetConsoleTextAttribute(ConsoleHandle, 249); // 字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+	cout << "第一关" << endl;
+	ps.X = 60;
+	ps.Y = 7;
+	SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+	cout << "第二关" << endl;
+	ps.X = 60;
+	ps.Y = 9;
+	SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+	cout << "第三关" << endl;
+	ps.X = 60;
+	ps.Y = 11;
+	SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+	cout << "第四关" << endl;
+	ps.X = 60;
+	ps.Y = 13;
+	SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+	SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+	cout << "退回" << endl;
+	char ch;
+	while (1)
+	{
+		ch = _getch();
+		switch (ch)
+		{
+		case 72:
+			if (key != 1)
+			{
+				switch (key)
+				{
+				case 2:
+					ps.X = 60;
+					ps.Y = 5;
+					SetConsoleTextAttribute(ConsoleHandle, 249); // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第一关" << endl;
+					ps.X = 60;
+					ps.Y = 7;
+					SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第二关" << endl;
+					key--;
+					break;
+				case 3:
+					ps.X = 60;
+					ps.Y = 7;
+					SetConsoleTextAttribute(ConsoleHandle, 249); // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第二关" << endl;
+					ps.X = 60;
+					ps.Y = 9;
+					SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第三关" << endl;
+					key--;
+					break;
+				case 4:
+					ps.X = 60;
+					ps.Y = 9;
+					SetConsoleTextAttribute(ConsoleHandle, 249);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第三关" << endl;
+					ps.X = 60;
+					ps.Y = 11;
+					SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第四关" << endl;
+					key--;
+					break;
+				case 5:
+					ps.X = 60;
+					ps.Y = 11;
+					SetConsoleTextAttribute(ConsoleHandle, 249);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第四关" << endl;
+					ps.X = 60;
+					ps.Y = 13;
+					SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "退回" << endl;
+					key--;
+					break;
+				}
+			}
+			break;
+		case 80:
+			if (key != 5)
+			{
+				switch (key)
+				{
+				case 1:
+					ps.X = 60;
+					ps.Y = 5;
+					SetConsoleTextAttribute(ConsoleHandle, 9); // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第一关" << endl;
+					ps.X = 60;
+					ps.Y = 7;
+					SetConsoleTextAttribute(ConsoleHandle, 249);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第二关" << endl;
+					key++;
+					break;
+				case 2:
+					ps.X = 60;
+					ps.Y = 7;
+					SetConsoleTextAttribute(ConsoleHandle, 9); // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第二关" << endl;
+					ps.X = 60;
+					ps.Y = 9;
+					SetConsoleTextAttribute(ConsoleHandle, 249);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第三关" << endl;
+					key++;
+					break;
+				case 3:
+					ps.X = 60;
+					ps.Y = 9;
+					SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第三关" << endl;
+					ps.X = 60;
+					ps.Y = 11;
+					SetConsoleTextAttribute(ConsoleHandle, 249);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第四关" << endl;
+					key++;
+					break;
+				case 4:
+					ps.X = 60;
+					ps.Y = 11;
+					SetConsoleTextAttribute(ConsoleHandle, 9);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "第四关" << endl;
+					ps.X = 60;
+					ps.Y = 13;
+					SetConsoleTextAttribute(ConsoleHandle, 249);   // 字体颜色
+					SetConsoleCursorPosition(ConsoleHandle, ps); // 移动光标
+					cout << "退回" << endl;
+					key++;
+					break;
+				}
+			}
+			break;
+		case 13:
+			return key;
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -464,7 +918,7 @@ void printTime(int time) {
 }
 
 //游戏主程序
-void game(int &time, int flag) {
+int game(int &time, int flag) {
 	clock_t start, end;
 	//定义边界对象
 	boundary boundary[4][27];
@@ -472,16 +926,15 @@ void game(int &time, int flag) {
 	Food food;
 	Snake snake;
 	char ch = 77;//获取键盘值，初始为右
-	COORD foodPosition;//食物坐标
-	foodPosition.X = 0; foodPosition.Y = 0;//初始化
+	COORD foodPosition{};//食物坐标
 
-	//画边界
+	//初始化
 	InitGraph(boundary,flag);
 	//画墙
 	setWall(wall, flag);
 	//设置食物
 	setfood(food, snake, foodPosition, wall);
-	int judge = 0;
+	int judge1 = 0,judge2 = 1;
 	start = clock();//计时开始
 	while (1) {
 		//打印蛇
@@ -490,15 +943,17 @@ void game(int &time, int flag) {
 		//获取键盘输入
 		input(snake, ch);
 		//蛇移动  判断结束
-		judge = move(snake, foodPosition, wall);
-		if (judge == 1)//吃到食物
-			return;
+		judge1 = move(snake, foodPosition, wall);
+		if (judge1 == 1)//吃到食物
+			return 1;
 		//计时
 		end = clock();
 		time = (double)(end - start) / CLOCKS_PER_SEC;
 		printTime(time);
 		//结束菜单
-		judgeFail(judge, time);
+		judge2 = judgeFail(judge1, time);
+		if (judge2 == 0)
+			return 0;
 	}
 }
 int main()
@@ -507,17 +962,47 @@ int main()
 	CONSOLE_CURSOR_INFO cursor_info = { 1, 0 };
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor_info);
 	int time = 0;//总时间
-	int flag;
+	int flag,menu1,menu2;//
 	int a = 1;//关卡
+	//开场动画
+	cartoon();
 	while (1) {
-		flag = 0;
-		game(time,a);
-		flag = judgeSuccess(time,a);
-		if (flag == 1)
-			break;
-		else if (flag == 2) {
-			a++;
+		menu1 = main_menu1();
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 0);  // 黑色清屏
+		system("cls");
+		if (menu1 == 1) {//闯关模式
+			while (1) {
+				flag = 0;
+				flag = game(time, a);
+				if (flag == 0)//游戏失败返回菜单
+					break;
+				flag = judgeSuccess(time, a);
+				if (flag == 1 || flag == 0)//退回主菜单
+					break;
+				else if (flag == 2) {//下一关
+					a++;
+				}
+			}
 		}
+		while (menu1 == 2) {//选关模式
+			system("cls");
+			menu2 = main_menu2();
+			switch (menu2) {
+			case 1:flag = game(time, 1); break;
+			case 2:flag = game(time, 2); break;
+			case 3:flag = game(time, 3); break;
+			case 4:flag = game(time, 4); break;
+			case 5:break;
+			}
+			if (menu2 == 5)
+				break;
+			if (flag == 1)
+				judgeSuccess(time, 4);
+		}
+		if (menu1 == 3)//退出
+			break;
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 0);  // 黑色清屏
+		system("cls");
 	}
 	return 0;
 }
